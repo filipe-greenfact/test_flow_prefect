@@ -7,13 +7,13 @@ import json
 from base64 import b64encode
 import zipfile, io
 import sqlalchemy as sa
-from datetime import datetime
+from datetime import datetime,timedelta
 
 
 @task
 def get_data():
     cme_api_secret_block = Secret.load("cme-api-password")
-    today=datetime.today().strftime('%Y%m%d')
+    today=datetime.today().strftime('%Y%m%d') - timedelta(days=1)
     query = {
     'dataset':'eod', 
     'foiindicator':'fut',
