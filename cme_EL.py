@@ -13,11 +13,11 @@ from datetime import datetime,timedelta
 @task
 def get_data():
     cme_api_secret_block = Secret.load("cme-api-password")
-    today=datetime.today().strftime('%Y%m%d') - timedelta(days=1)
+    yesterday=datetime.today - timedelta(days=1)
     query = {
     'dataset':'eod', 
     'foiindicator':'fut',
-    'yyyymmdd':today
+    'yyyymmdd':yesterday.strftime('%Y%m%d')
     }
     response = requests.get(
     "https://datamine.cmegroup.com/cme/api/v1/list",
