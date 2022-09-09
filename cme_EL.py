@@ -43,11 +43,17 @@ def create_dataframe(arr):
     return appended_data
 
 @task
-def upload_data(data_frame):
+def clean_data(data_frame_raw):
+    
+    data_frame_raw.drop(['Exchange Code'], axis=1, inplace=True)
+    return data_frame_raw
+
+@task
+def upload_data(data_frame,table):
     #sql_types =  {"Trade Date" : sa.types.Date(),"Last Trade Date": sa.types.Date()}
     db_secret_block = Secret.load("db-password")
     engine = sa.create_engine(f'postgresql://postgres:{db_secret_block.get()}@db.wuitaitdzsskcihzjefc.supabase.co:5432/postgres')
-    data_frame.to_sql('cme_sample_flow_data', con=engine,if_exists="append",index=False)
+    data_frame.to_sql(table, con=engine,if_exists="append",index=False)
 
 @flow    
 def pipeline():
@@ -55,7 +61,10 @@ def pipeline():
     if len(arr) == 0:
         raise Warning("No new data to process")
     data_frame = create_dataframe(arr)
-    upload_data(data_frame)
+    upload_data(data_frame,'cme_sample_raw_data')
+    data_frame = clean_data(data_frame)
+    upload_data(data_frame,'cme_sample_clean_data')
+
 
 if __name__ == "__main__":
     pipeline()
